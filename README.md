@@ -109,13 +109,12 @@ Joins/Creates a Classroom (via invite code)
 
 > **Screenshots coming soon!** Want to help? See issue [#1 — Add screenshots to README](#-good-first-issues).
 
-<!--
-Add screenshots here once available:
-![Landing Page](screenshots/landing.png)
+
+[Landing Page](screenshots/landing.png)
 ![AI Solver](screenshots/ai-solver.png)
 ![Classroom View](screenshots/classroom.png)
 ![Analytics Dashboard](screenshots/analytics.png)
--->
+
 
 ---
 
