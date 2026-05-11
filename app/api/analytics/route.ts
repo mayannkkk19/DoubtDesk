@@ -71,6 +71,18 @@ export async function GET(req: Request) {
             .innerJoin(doubtsTable, eq(repliesTable.doubtId, doubtsTable.id))
             .where(eq(doubtsTable.classroomId, classroomId));
 
+        // 7. Top Contributors (students who reply the most)
+        const topContributors = await db.select({
+            name: repliesTable.userName,
+            replyCount: count(repliesTable.id)
+        })
+            .from(repliesTable)
+            .innerJoin(doubtsTable, eq(repliesTable.doubtId, doubtsTable.id))
+            .where(eq(doubtsTable.classroomId, classroomId))
+            .groupBy(repliesTable.userName)
+            .orderBy(desc(count(repliesTable.id)))
+            .limit(5);
+
         // 6. AI Teaching Suggestions & Weak Concept Detection (Heuristics)
         const weakTopics = mostAskedTopics.map((topic, index) => {
             const countValue = Number(topic.count);
@@ -118,7 +130,8 @@ export async function GET(req: Request) {
                 ...engagement[0],
                 totalReplies: totalReplies[0]?.count || 0
             },
-            weakTopics: weakTopics.filter(t => t.severity !== 'Low')
+            weakTopics: weakTopics.filter(t => t.severity !== 'Low'),
+            topContributors: topContributors.map(c => ({ name: c.name, replyCount: Number(c.replyCount) }))
         });
 
     } catch (error: any) {
@@ -129,7 +142,8 @@ export async function GET(req: Request) {
             solvedStats: [],
             peakTime: [],
             engagement: { totalStudents: 0, totalDoubts: 0, totalReplies: 0 },
-            weakTopics: []
+            weakTopics: [],
+            topContributors: []
         });
     }
 }
