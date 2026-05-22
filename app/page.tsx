@@ -8,6 +8,7 @@ import {
   SignedOut,
   useClerk,
   UserButton,
+
 } from "@clerk/nextjs";
 
 import {
@@ -39,6 +40,7 @@ import {
 import { ThemeToggle } from "@/components/ThemeToggle";
 import ShapeGrid from "@/components/ShapeGrid";
 import { Inter, Staatliches } from "next/font/google";
+import ClassroomPreviewCard from "@/components/ClassroomPreviewCard";
 
 const inter = Inter({ subsets: ["latin"] });
 const staatliches = Staatliches({ weight: "400", subsets: ["latin"] });
@@ -257,23 +259,8 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
-              <SignedIn>
-                <Link href="/rooms" className="w-full sm:w-auto">
-                  <button className="group px-10 py-5 bg-blue-600 text-white rounded-2xl text-lg font-bold hover:bg-blue-700 hover:shadow-[0_0_30px_rgba(37,99,235,0.4)] transition-all w-full flex items-center justify-center gap-2">
-                    Open Classroom
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </Link>
-              </SignedIn>
-              <SignedOut>
-                <SignUpButton mode="modal" forceRedirectUrl="/rooms">
-                  <button className="group px-10 py-5 bg-white text-slate-950 rounded-2xl text-lg font-bold hover:bg-slate-200 transition-all w-50 flex items-center justify-center gap-2">
-                    Open Classroom
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </SignUpButton>
-              </SignedOut>
+            <div className="flex items-center justify-center xl:justify-end">
+              <ClassroomPreviewCard />
             </div>
 
           </div>
