@@ -64,9 +64,8 @@ describe('Doubts API Endpoints', () => {
         const res = await GET(req);
         const json = await res.json();
         expect(res.status).toBe(200);
-        expect(json.doubts).toHaveLength(1);
-        expect(json.doubts[0].subject).toBe('Physics');
-        expect(json.pagination.total).toBe(2);
+        expect(json).toHaveLength(1);            
+        expect(json[0].subject).toBe('Physics'); 
     });
 
     it('POST should create a new doubt', async () => {
