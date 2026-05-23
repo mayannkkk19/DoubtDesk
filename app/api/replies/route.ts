@@ -1,11 +1,12 @@
 import { db } from "@/configs/db";
 import { repliesTable, doubtsTable, classroomsTable, replyLikesTable, usersTable } from "@/configs/schema";
-import { eq, asc, sql } from "drizzle-orm";
+import { eq, asc, sql, and } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { moderateContent, handleModerationViolation } from "@/lib/moderation";
 import { buildErrorResponse } from "@/lib/error-handler";
 import { inngest } from "@/inngest/client";
+import { DOUBT_STATUS } from "@/lib/doubtStatus";
 
 export async function GET(req: Request) {
     try {
@@ -119,6 +120,31 @@ export async function POST(req: Request) {
             content: content || null,
             imageUrl: imageUrl || null,
         }).returning();
+
+        // Auto-transition: unsolved -> in-progress on first reply.
+        // Design notes:
+        //  - Any reply type qualifies (issue 183 says "when the first reply is posted").
+        //  - We never downgrade `solved` -> `in-progress`; the WHERE guard (`isSolved = 'unsolved'`) makes this idempotent and race condition-safe when two replies land near-simultaneously.
+        //  - AI-typed doubts are excluded because they follow a separate teacher-verification flow (see app/api/doubts/action/[id]/route.ts).
+        //  - This update is best-effort; a failure here must not fail the reply creation, so we swallow errors and log.
+        if (doubt && doubt.type !== "ai") {
+            try {
+                await db
+                    .update(doubtsTable)
+                    .set({ isSolved: DOUBT_STATUS.IN_PROGRESS })
+                    .where(
+                        and(
+                            eq(doubtsTable.id, parseInt(doubtId)),
+                            eq(doubtsTable.isSolved, DOUBT_STATUS.UNSOLVED)
+                        )
+                    );
+            } catch (transitionErr) {
+                console.error(
+                    "Failed to auto-transition doubt to in-progress (safely caught):",
+                    transitionErr
+                );
+            }
+        }
 
         // Trigger background email notification via Inngest
         try {

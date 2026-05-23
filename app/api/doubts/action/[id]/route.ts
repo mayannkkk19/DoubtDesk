@@ -3,13 +3,14 @@ import { doubtTagsTable, doubtsTable, likesTable, classroomsTable, repliesTable,
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
+import { DOUBT_STATUS, DoubtStatus, isValidDoubtStatus } from "@/lib/doubtStatus";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const user = await currentUser();
         const email = user?.primaryEmailAddress?.emailAddress;
         
-        const { action, content, subject, imageUrl, userName, replyId, tags = [] } = await req.json();
+        const { action, content, subject, imageUrl, userName, replyId, status, tags = [] } = await req.json();
         const { id } = await params;
         const doubtId = parseInt(id);
 
@@ -76,12 +77,32 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
                 return NextResponse.json({ error: "Only a teacher can verify and mark AI-generated solutions as solved." }, { status: 403 });
             }
 
-            let newStatus = doubt.isSolved === "solved" ? "unsolved" : "solved";
-            let newSolvedReplyId = replyId || null;
+            // Resolve the target status.
+            //
+            //  - If the client passes an explicit `status` (e.g. a teacher
+            //    setting `in-progress` from a dropdown), use it after validation.
+            //  - Otherwise preserve the historical toggle behaviour:
+            //      solved      -> unsolved   (un-marking a resolved doubt)
+            //      anything    -> solved     (unsolved or in-progress => solved)
+            //
+            // `solvedReplyId` continues to be cleared whenever we leave the
+            // `solved` state, so we don't keep stale references around.
+            let newStatus: DoubtStatus;
+            if (status !== undefined) {
+                if (!isValidDoubtStatus(status)) {
+                    return NextResponse.json({ error: "Invalid status value" }, { status: 400 });
+                }
+                newStatus = status;
+            } else {
+                newStatus = doubt.isSolved === DOUBT_STATUS.SOLVED
+                    ? DOUBT_STATUS.UNSOLVED
+                    : DOUBT_STATUS.SOLVED;
+            }
+            let newSolvedReplyId: number | null = replyId || null;
 
             // Conditional Solving: Teacher can only mark as solved if at least 1 solution exists
             // (unless they are unsolving, or providing a replyId right now)
-            if (isTeacher && !isOwner && newStatus === "solved" && !replyId) {
+            if (isTeacher && !isOwner && newStatus === DOUBT_STATUS.SOLVED && !replyId) {
                 const solutionReplies = await db.select()
                     .from(repliesTable)
                     .where(and(eq(repliesTable.doubtId, doubtId), eq(repliesTable.type, 'solution')))
@@ -94,12 +115,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
                 }
             }
 
+            // If a replyId is provided, it is used to either toggle off a previously
+            // pinned solution or pin a new one — this overrides the resolved status above.
             if (replyId && doubt.solvedReplyId === replyId) {
-                newStatus = "unsolved";
+                newStatus = DOUBT_STATUS.UNSOLVED;
                 newSolvedReplyId = null;
             } else if (replyId) {
-                newStatus = "solved";
+                newStatus = DOUBT_STATUS.SOLVED;
                 newSolvedReplyId = replyId;
+            }
+
+            // Defensive: only `solved` doubts should retain a solvedReplyId.
+            if (newStatus !== DOUBT_STATUS.SOLVED) {
+                newSolvedReplyId = null;
             }
 
             const updated = await db.update(doubtsTable)

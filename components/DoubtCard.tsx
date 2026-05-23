@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageSquare, ThumbsUp, CheckCircle, Edit2, Trash2, X, ZoomIn, AlertTriangle, Pin, Bookmark } from "lucide-react";
+import { MessageSquare, ThumbsUp, CheckCircle, Edit2, Trash2, X, ZoomIn, AlertTriangle, Pin, Bookmark, Clock } from "lucide-react";
 import AskDoubt from "./AskDoubt";
 import DoubtRepliesModal from "./DoubtRepliesModal";
 import { toast } from "sonner";
@@ -173,6 +173,11 @@ export default function DoubtCard({ doubt, onUpdate, onViewAISolution, role }: D
                             <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-1.5">
                                 <CheckCircle className="w-3 h-3 text-emerald-500" />
                                 <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Solved</span>
+                            </div>
+                        ) : doubt.isSolved === "in-progress" ? (
+                            <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center gap-1.5">
+                                <Clock className="w-3 h-3 text-amber-500" />
+                                <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest">In Progress</span>
                             </div>
                         ) : (
                             <div className="px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full flex items-center gap-1.5">
