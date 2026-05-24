@@ -4,10 +4,15 @@ import { useEffect, useState } from "react";
 import { MessageSquare, Plus, SlidersHorizontal, Loader2 } from "lucide-react";
 import AskDoubt from "@/components/AskDoubt";
 import DoubtCard from "@/components/DoubtCard";
+import DoubtSortSelect, { DoubtSortValue } from "@/components/DoubtSortSelect";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useSWRInfinite from "swr/infinite";
 import { useInView } from "react-intersection-observer";
 
 export default function PublicRoomsPage() {
+    const pathname = usePathname();
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [isAskModalOpen, setIsAskModalOpen] = useState(false);
     const [filter, setFilter] = useState("All");
     const [tagFilter, setTagFilter] = useState("");
@@ -27,7 +32,22 @@ export default function PublicRoomsPage() {
         return () => clearTimeout(timer);
     }, [searchVal]);
 
+    const sort = (searchParams.get("sort") as DoubtSortValue) || "newest";
+
     const fetcher = (url: string) => fetch(url).then(res => res.json());
+
+    const updateSort = (nextSort: DoubtSortValue) => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (nextSort === "newest") {
+            params.delete("sort");
+        } else {
+            params.set("sort", nextSort);
+        }
+
+        const query = params.toString();
+        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+        setSize(1);
+    };
 
     const getKey = (pageIndex: number, previousPageData: any[]) => {
         if (previousPageData && !previousPageData.length) return null;
@@ -46,6 +66,10 @@ export default function PublicRoomsPage() {
 
         if (appliedTagFilter.trim()) {
             params.append("tag", appliedTagFilter.trim());
+        }
+
+        if (sort !== "newest") {
+            params.append("sort", sort);
         }
 
         if (userName) params.append("userName", userName);
@@ -204,6 +228,8 @@ export default function PublicRoomsPage() {
                         >
                             Tag
                         </button>
+
+                        <DoubtSortSelect value={sort} onValueChange={updateSort} className="ml-auto" />
                     </div>
                 </div>
             </div>
