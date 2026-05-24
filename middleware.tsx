@@ -14,7 +14,9 @@ export default clerkMiddleware(async (auth, req) => {
 
     // Rate limiting for public-facing API routes
     if (req.nextUrl.pathname.startsWith('/api') && !req.nextUrl.pathname.startsWith('/api/inngest')) {
-        const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
+        const { userId } = await auth();
+        const ip = req.ip ?? req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for') ?? '127.0.0.1';
+        const rateLimitKey = userId || ip;
         
         // Choose limiter based on path
         const isAiRoute = req.nextUrl.pathname.includes('/solve') || req.nextUrl.pathname.includes('/ask-ai');
@@ -22,7 +24,7 @@ export default clerkMiddleware(async (auth, req) => {
         const limiter = isVideoRoute ? videoLimiter : (isAiRoute ? aiLimiter : generalLimiter);
 
         try {
-            const { success, limit, remaining, reset } = await limiter.limit(ip);
+            const { success, limit, remaining, reset } = await limiter.limit(rateLimitKey);
 
             if (!success) {
                 return new NextResponse(
