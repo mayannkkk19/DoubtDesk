@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { SignedIn, UserButton, useClerk } from "@clerk/nextjs"
+import { usePathname } from "next/navigation"
 import Sidebar from "@/components/Sidebar"
 import { Menu, LogOut, User } from "lucide-react"
 import Link from "next/link"
@@ -27,6 +28,15 @@ export default function DashboardLayout({
     const [showSignOutDialog, setShowSignOutDialog] = useState(false)
 
     const { signOut } = useClerk()
+
+    const pathname = usePathname()
+    const pageTitles: Record<string, string> = {
+        "/dashboard": "Dashboard",
+        "/rooms": "Virtual Campus",
+        "/public-rooms": "Public Doubts"
+    }
+        
+    const pageTitle = pageTitles[pathname] || "Dashboard";
 
     const handleSignOut = async () => {
         await signOut({ redirectUrl: "/" })
@@ -57,10 +67,10 @@ export default function DashboardLayout({
 
                             <div className="hidden md:flex flex-col">
                                 <h1 className="text-sm font-semibold tracking-wide text-foreground">
-                                    Dashboard
+                                   {pageTitle}
                                 </h1>
                                 <p className="text-xs text-muted-foreground">
-                                    Welcome back to DoubtDesk
+                                    {'Welcome back to DoubtDesk'}
                                 </p>
                             </div>
                         </div>
