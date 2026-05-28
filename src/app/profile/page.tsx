@@ -88,7 +88,7 @@ function ErrorState({ message, onRetry }: ErrorStateProps) {
       <button
         onClick={onRetry}
         className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-zinc-300 shadow-sm transition-all duration-200 hover:bg-slate-50 dark:hover:bg-zinc-800 active:scale-[0.98]"
-      >
+       aria-label="Interactive button">
         <RefreshCw className="h-4 w-4" />
         Retry Sync Connection
       </button>
@@ -207,7 +207,7 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto p-4 md:p-8 max-w-5xl mt-16 text-slate-900 dark:text-zinc-100 bg-white dark:bg-black transition-colors duration-500">
       <button
-        onClick={() => router.back()}
+        onClick={() = aria-label="button"> router.back()}
         className="flex items-center gap-2 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors mb-6 group text-sm font-medium"
       >
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />

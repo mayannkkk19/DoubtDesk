@@ -142,7 +142,7 @@ export default function NotificationBell() {
                     variant="ghost" 
                     size="icon" 
                     className="relative rounded-full hover:bg-accent transition-colors"
-                >
+                 aria-label="button">
                     <Bell className="h-5 w-5 text-muted-foreground" />
                     {unreadCount > 0 && (
                         <span className="absolute -top-1 -right-1 flex min-w-5 h-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white ring-2 ring-background">
@@ -160,7 +160,7 @@ export default function NotificationBell() {
                             size="sm" 
                             onClick={markAllAsRead}
                             className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
-                        >
+                         aria-label="Interactive button">
                             <Check className="h-3 w-3 mr-1" />
                             Mark all as read
                         </Button>

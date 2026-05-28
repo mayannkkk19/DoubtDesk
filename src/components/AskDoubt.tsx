@@ -316,7 +316,7 @@ export default function AskDoubt({ defaultSubject = "", isOpen, onClose, onSucce
                                 Suggested subject: {suggestedSubject}
                                 <button
                                     type="button"
-                                    onClick={() => {
+                                    onClick={() = aria-label="button"> {
                                         setSubject(suggestedSubject);
                                         setSubjectWasEdited(false);
                                     }}
@@ -332,14 +332,14 @@ export default function AskDoubt({ defaultSubject = "", isOpen, onClose, onSucce
                         <div className="flex items-center justify-between px-1">
                             <label className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 dark:text-slate-500">Your Question (Optional if attachment added)</label>
                             <div className="flex items-center gap-1">
-                                <button type="button" onClick={() => insertMarkdown("bold")} className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded text-slate-600 dark:text-slate-400"><Bold className="w-3 h-3" /></button>
-                                <button type="button" onClick={() => insertMarkdown("italic")} className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded text-slate-600 dark:text-slate-400"><Italic className="w-3 h-3" /></button>
-                                <button type="button" onClick={() => insertMarkdown("code")} className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded text-slate-600 dark:text-slate-400"><Code className="w-3 h-3" /></button>
-                                <button type="button" onClick={() => insertMarkdown("list")} className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded text-slate-600 dark:text-slate-400"><List className="w-3 h-3" /></button>
+                                <button type="button" onClick={() = aria-label="button"> insertMarkdown("bold")} className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded text-slate-600 dark:text-slate-400"><Bold className="w-3 h-3" /></button>
+                                <button type="button" onClick={() = aria-label="button"> insertMarkdown("italic")} className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded text-slate-600 dark:text-slate-400"><Italic className="w-3 h-3" /></button>
+                                <button type="button" onClick={() = aria-label="button"> insertMarkdown("code")} className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded text-slate-600 dark:text-slate-400"><Code className="w-3 h-3" /></button>
+                                <button type="button" onClick={() = aria-label="button"> insertMarkdown("list")} className="p-1.5 hover:bg-slate-200 dark:hover:bg-white/10 rounded text-slate-600 dark:text-slate-400"><List className="w-3 h-3" /></button>
                                 <div className="w-px h-3 bg-slate-200 dark:bg-white/10 mx-1" />
                                 <button
                                     type="button"
-                                    onClick={() => setIsPreviewMode(!isPreviewMode)}
+                                    onClick={() = aria-label="button"> setIsPreviewMode(!isPreviewMode)}
                                     className={`flex items-center gap-1.5 px-2 py-1 rounded text-[9px] font-black uppercase transition-all ${isPreviewMode ? 'bg-blue-500 text-white' : 'hover:bg-white/10 text-slate-400'}`}
                                 >
                                     {isPreviewMode ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
@@ -413,7 +413,7 @@ export default function AskDoubt({ defaultSubject = "", isOpen, onClose, onSucce
                                 onClick={addSuggestedTags}
                                 disabled={!content.trim()}
                                 className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-blue-400 hover:text-blue-300 disabled:opacity-40"
-                            >
+                             aria-label="Interactive button">
                                 <Sparkles className="w-3 h-3" /> Suggest
                             </button>
                         </div>
@@ -434,7 +434,7 @@ export default function AskDoubt({ defaultSubject = "", isOpen, onClose, onSucce
                             />
                             <button
                                 type="button"
-                                onClick={() => addTag(tagDraft)}
+                                onClick={() = aria-label="button"> addTag(tagDraft)}
                                 className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                             >
                                 Add
@@ -446,7 +446,7 @@ export default function AskDoubt({ defaultSubject = "", isOpen, onClose, onSucce
                                     <button
                                         key={tag}
                                         type="button"
-                                        onClick={() => setTags((currentTags) => currentTags.filter((item) => item !== tag))}
+                                        onClick={() = aria-label="button"> setTags((currentTags) => currentTags.filter((item) => item !== tag))}
                                         className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-200 text-[10px] font-bold"
                                     >
                                         {tag}
@@ -487,7 +487,7 @@ export default function AskDoubt({ defaultSubject = "", isOpen, onClose, onSucce
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={(e) => { e.stopPropagation(); setFileName(""); setImageUrl(""); setFileSize(""); }}
+                                                onClick={(e) = aria-label="button"> { e.stopPropagation(); setFileName(""); setImageUrl(""); setFileSize(""); }}
                                                 className="mt-2 text-[10px] bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:hover:text-white px-4 py-1.5 rounded-xl font-black uppercase tracking-widest transition-all z-20"
                                             >
                                                 Remove Attachment
@@ -504,7 +504,7 @@ export default function AskDoubt({ defaultSubject = "", isOpen, onClose, onSucce
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={(e) => { e.stopPropagation(); setFileName(""); setImageUrl(""); setFileSize(""); }}
+                                                onClick={(e) = aria-label="button"> { e.stopPropagation(); setFileName(""); setImageUrl(""); setFileSize(""); }}
                                                 className="text-[10px] bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-slate-900 dark:hover:text-white px-4 py-1 rounded-xl font-black uppercase tracking-widest transition-all z-20"
                                             >
                                                 Remove Attachment
@@ -535,14 +535,14 @@ export default function AskDoubt({ defaultSubject = "", isOpen, onClose, onSucce
                             type="button"
                             onClick={onClose}
                             className="flex-1 py-4 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-900 dark:text-white rounded-2xl font-bold transition-all border border-slate-200 dark:border-white/5"
-                        >
+                         aria-label="Close">
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting || (!content.trim() && !imageUrl) || !subject.trim() || isTooLong || (hasContent && isTooShort)}
                             className="flex-[2] py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
+                         aria-label="Submit">
                             {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                             {doubtToEdit ? "Update Doubt" : "Post Doubt"}
                         </button>
