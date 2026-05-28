@@ -2,15 +2,23 @@ import { NextRequest } from 'next/server';
 import { generateUnsubscribeToken } from '@/lib/email';
 import { GET, POST } from '@/app/api/unsubscribe/route';
 
-const mockWhere = jest.fn();
-const mockSet = jest.fn(() => ({ where: mockWhere }));
-const mockUpdate = jest.fn(() => ({ set: mockSet }));
+jest.mock('@/configs/db', () => {
+    const mockWhere = jest.fn();
+    const mockSet = jest.fn(() => ({ where: mockWhere }));
+    const mockUpdate = jest.fn(() => ({ set: mockSet }));
+    return {
+        db: {
+            update: mockUpdate,
+        },
+        _mocks: {
+            mockUpdate,
+            mockSet,
+            mockWhere,
+        }
+    };
+});
 
-jest.mock('@/configs/db', () => ({
-    db: {
-        update: mockUpdate,
-    },
-}));
+const { mockUpdate, mockSet, mockWhere } = require('@/configs/db')._mocks;
 
 jest.mock('@/configs/schema', () => ({
     usersTable: {

@@ -34,6 +34,14 @@ jest.mock('@clerk/nextjs', () => ({
     useAuth: () => ({ userId: '1', getToken: async () => 'token' }),
 }));
 
+jest.mock('@/components/KeyboardShortcutsProvider', () => ({
+    useKeyboardShortcuts: () => ({
+        toggleOpen: jest.fn(),
+        isOpen: false,
+        setIsOpen: jest.fn(),
+    }),
+}));
+
 import Sidebar from '@/components/Sidebar';
 
 describe('Sidebar Component', () => {

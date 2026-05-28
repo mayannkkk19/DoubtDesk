@@ -78,6 +78,7 @@ const socialLinks = [
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
+
   const socialLinks = [
     {
       icon: Linkedin,
@@ -149,7 +150,7 @@ export default function Footer() {
                 <li>
                   <Link href="/rooms" className="group flex items-center gap-1.5 transition-transform duration-200 hover:translate-x-0.5 hover:text-blue-500 dark:hover:text-blue-400">
                     <ChevronRight className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                    <span>Classrooms</span>
+                    <span>Virtual Campus</span>
                   </Link>
                 </li>
                 <li>
@@ -161,7 +162,7 @@ export default function Footer() {
                 <li>
                   <Link href="/public-rooms" className="group flex items-center gap-1.5 transition-transform duration-200 hover:translate-x-0.5 hover:text-blue-500 dark:hover:text-blue-400">
                     <ChevronRight className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                    <span>Public Rooms</span>
+                    <span>Public Doubts</span>
                   </Link>
                 </li>
                 <li>
@@ -187,14 +188,14 @@ export default function Footer() {
                 <li>
                   <Link href="/faq" className="group flex items-center gap-1.5 transition-transform duration-200 hover:translate-x-0.5 hover:text-blue-500 dark:hover:text-blue-400">
                     <ChevronRight className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                    <span>Help Center FAQ</span>
+                    <span>FAQs</span>
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="group flex items-center gap-1.5 transition-transform duration-200 hover:translate-x-0.5 hover:text-blue-500 dark:hover:text-blue-400">
+                  <a href="mailto:karankmt.tripathi@gmail.com" className="group flex items-center gap-1.5 transition-transform duration-200 hover:translate-x-0.5 hover:text-blue-500 dark:hover:text-blue-400">
                     <ChevronRight className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                     <span>Contact</span>
-                  </Link>
+                  </a>
                 </li>
                 <li>
                   <Link href="/terms-of-service" className="group flex items-center gap-1.5 transition-transform duration-200 hover:translate-x-0.5 hover:text-blue-500 dark:hover:text-blue-400">

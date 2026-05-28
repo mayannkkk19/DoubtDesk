@@ -68,7 +68,8 @@ describe('Email Helper Functions', () => {
         expect(verifyUnsubscribeToken('student@college.edu', expiresAt.toString(), null)).toBe(false);
         expect(verifyUnsubscribeToken('student@college.edu', null, token)).toBe(false);
         expect(verifyUnsubscribeToken('student@college.edu', 'not-a-timestamp', token)).toBe(false);
-        expect(verifyUnsubscribeToken('student@college.edu', expiresAt.toString(), `${token.slice(0, -2)}ff`)).toBe(false);
+        const tamperedToken = token[0] === '0' ? '1' + token.slice(1) : '0' + token.slice(1);
+        expect(verifyUnsubscribeToken('student@college.edu', expiresAt.toString(), tamperedToken)).toBe(false);
         expect(verifyUnsubscribeToken('student@college.edu', expiresAt.toString(), 'not-hex')).toBe(false);
     });
 

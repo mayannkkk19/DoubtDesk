@@ -1,9 +1,13 @@
 import axios from "axios";
 import { POST } from "@/app/api/resume-analyzer/route";
 
-const mockPdf = jest.fn();
+jest.mock("pdf-parse-fork", () => {
+    const mock = jest.fn();
+    (globalThis as any).__mockPdf = mock;
+    return mock;
+});
 
-jest.mock("pdf-parse-fork", () => mockPdf);
+const mockPdf = (globalThis as any).__mockPdf;
 
 jest.mock("axios", () => ({
     __esModule: true,
@@ -22,27 +26,52 @@ jest.mock("@/lib/auth-utils", () => ({
     checkUserBlock: jest.fn().mockResolvedValue({ isBlocked: false })
 }));
 
-const mockDbValues = jest.fn().mockResolvedValue(undefined);
+jest.mock("@/configs/db", () => {
+    const mockDbValues = jest.fn().mockResolvedValue(undefined);
+    return {
+        db: {
+            insert: jest.fn().mockReturnValue({
+                values: mockDbValues
+            })
+        },
+        _mocks: {
+            mockDbValues
+        }
+    };
+});
 
-jest.mock("@/configs/db", () => ({
-    db: {
-        insert: jest.fn().mockReturnValue({
-            values: mockDbValues
-        })
-    }
-}));
+const { mockDbValues } = require("@/configs/db")._mocks;
 
-function createMultipartRequest(file?: Blob, filename = "resume.pdf") {
-    const formData = new FormData();
-
+function createMultipartRequest(file?: any, filename = "resume.pdf") {
+    let mockFile: any = null;
     if (file) {
-        formData.append("resume", file, filename);
+        let content = "";
+        if (typeof file === "string") {
+            content = file;
+        } else if (file._buffer) {
+            content = file._buffer.toString();
+        } else {
+            content = file.toString();
+        }
+        
+        mockFile = {
+            name: filename,
+            size: file.size || content.length,
+            type: file.type || "application/pdf",
+            arrayBuffer: jest.fn().mockResolvedValue(new TextEncoder().encode(content).buffer),
+        };
     }
 
-    return new Request("http://localhost/api/resume-analyzer", {
-        method: "POST",
-        body: formData
-    }) as any;
+    const mockFormData = {
+        get: jest.fn().mockImplementation((key: string) => {
+            if (key === "resume") return mockFile;
+            return null;
+        }),
+    };
+
+    return {
+        formData: jest.fn().mockResolvedValue(mockFormData),
+    } as any;
 }
 
 describe("Resume Analyzer API Endpoint", () => {
@@ -60,13 +89,16 @@ describe("Resume Analyzer API Endpoint", () => {
     });
 
     it("rejects non-file resume form fields", async () => {
-        const formData = new FormData();
-        formData.append("resume", "not a file");
+        const mockFormData = {
+            get: jest.fn().mockImplementation((key: string) => {
+                if (key === "resume") return "not a file";
+                return null;
+            }),
+        };
 
-        const req = new Request("http://localhost/api/resume-analyzer", {
-            method: "POST",
-            body: formData
-        }) as any;
+        const req = {
+            formData: jest.fn().mockResolvedValue(mockFormData),
+        } as any;
 
         const res = (await POST(req))!;
         const json = await res.json();
