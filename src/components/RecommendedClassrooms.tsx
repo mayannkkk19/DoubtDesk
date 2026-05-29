@@ -15,24 +15,36 @@ type Classroom = {
     activityCount: number;
 };
 
+const ERROR_MESSAGES = {
+    RECOMMENDATIONS_LOAD_FAILED: "Failed to load recommendations",
+} as const;
+
+const UI_TEXT = {
+    ERROR_HEADING: "Unable to load recommendations.",
+    RETRY_BUTTON: "Try again",
+    RETRY_RECOMMENDATIONS_LABEL: "Retry loading recommendations",
+} as const;
+
 export default function RecommendedClassrooms() {
     const [classrooms, setClassrooms] = useState<Classroom[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchRecommendations = async () => {
         try {
             const res = await fetch("/api/recommendations");
-
-            if (!res.ok) {
-                throw new Error("Failed to fetch recommendations");
-            }
-
             const data = await res.json();
 
+            if (!res.ok) {
+                throw new Error(data?.error || ERROR_MESSAGES.RECOMMENDATIONS_LOAD_FAILED);
+            }
+
             setClassrooms(data.recommendations || []);
+            setError(null);
         } catch (error) {
             console.error(error);
+            setError(error instanceof Error ? error.message : ERROR_MESSAGES.RECOMMENDATIONS_LOAD_FAILED);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -53,6 +65,32 @@ export default function RecommendedClassrooms() {
             <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading recommendations...
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div
+                role="alert"
+                className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+            >
+                <p className="font-medium">{UI_TEXT.ERROR_HEADING}</p>
+                <p className="mt-1 text-red-600">{error}</p>
+                <button
+                    onClick={refreshRecommendations}
+                    disabled={refreshing}
+                    aria-label={UI_TEXT.RETRY_RECOMMENDATIONS_LABEL}
+                    className="mt-3 flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
+                >
+                    <RefreshCw
+                        aria-hidden="true"
+                        className={`h-4 w-4 ${
+                            refreshing ? "animate-spin" : ""
+                        }`}
+                    />
+                    {UI_TEXT.RETRY_BUTTON}
+                </button>
             </div>
         );
     }
