@@ -1,7 +1,7 @@
 import { db } from "@/configs/db";
 import { bookmarksTable, doubtTagsTable, doubtsTable, likesTable, repliesTable, membershipsTable, classroomsTable, tagsTable } from "@/configs/schema";
 import { categorizeDoubt } from "@/lib/ai/categorizer";
-import { and, eq, inArray, isNull, or, not, sql, ilike, desc, getTableColumns } from "drizzle-orm";
+import { and, eq, inArray, isNull, or, not, sql, SQL, ilike, desc, getTableColumns } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { moderateContent, handleModerationViolation } from "@/lib/moderation";
@@ -40,7 +40,6 @@ export async function GET(req: Request) {
             // but usually this should be blocked.
         }
 
-        let query = db.select().from(doubtsTable);
         let conditions: SQL<unknown>[] = [];
 
         // Base Classroom scoping
