@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 import { currentUser } from '@clerk/nextjs/server';
 import { db } from '@/configs/db';
-import { doubtsTable, repliesTable, usersTable } from '@/configs/schema';
+import { doubtsTable, repliesTable, usersTable, classroomsTable } from '@/configs/schema';
 import { eq } from 'drizzle-orm';
 import { moderateContent, handleModerationViolation } from '@/lib/moderation';
+import { checkPedagogicalDrift } from '@/lib/pedagogy';
 
 const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY || 'dummy_key',
@@ -279,6 +280,27 @@ export async function POST(req: Request) {
             }
         }
 
+        let targetGradeLevel = 13;
+        let pedagogyLevel = "Undergraduate (Freshman)";
+
+        if (classroomId) {
+            try {
+                const [classroom] = await db
+                    .select({
+                        pedagogyLevel: classroomsTable.pedagogyLevel,
+                        targetGradeLevel: classroomsTable.targetGradeLevel,
+                    })
+                    .from(classroomsTable)
+                    .where(eq(classroomsTable.id, parseInt(classroomId.toString())));
+                if (classroom) {
+                    pedagogyLevel = classroom.pedagogyLevel;
+                    targetGradeLevel = classroom.targetGradeLevel;
+                }
+            } catch (dbErr) {
+                console.error("Failed to fetch classroom pedagogy settings:", dbErr);
+            }
+        }
+
         // 1. AI Moderation Check for Prompts
         if (prompt) {
             const moderation =
@@ -319,6 +341,11 @@ export async function POST(req: Request) {
 - Subscripts: Always use proper LaTeX (e.g., \\omega_1).
 - Symbols: Wrap all variables and greek letters in math delimiters.
 - Cleanliness: No repeated characters or filler text.`;
+
+        const PEDAGOGY_RULES = classroomId ? `
+### PEDAGOGICAL LEVEL TARGET:
+- The target student academic level is: ${pedagogyLevel} (Flesch-Kincaid Grade Level Target: ${targetGradeLevel}).
+- Explain concepts at this specific complexity. Do NOT use terms or mathematical proofs beyond this grade level. Avoid oversimplifying unless required.` : '';
 
         let systemPrompt: string;
 
@@ -375,6 +402,10 @@ Use EXACTLY these 3 ## sections:
 ## Final Answer
 
 Use bold text (e.g. **Step 1:**) for sub-steps inside the sections. Do NOT use any other ## headings.`;
+        }
+
+        if (systemPrompt) {
+            systemPrompt += PEDAGOGY_RULES;
         }
 
         const isVisionRequest =
@@ -493,6 +524,8 @@ ${prompt ? `Additional context from student: ${prompt}` : ''}`;
                     })
                     .returning();
 
+                const driftResult = checkPedagogicalDrift(reply, targetGradeLevel);
+
                 if (newDoubt) {
                     const [aiReply] = await db
                         .insert(repliesTable)
@@ -501,6 +534,11 @@ ${prompt ? `Additional context from student: ${prompt}` : ''}`;
                             userName: 'DoubtDesk AI',
                             type: 'solution',
                             content: reply,
+                            gradeLevel: driftResult.gradeLevel,
+                            complexityScore: driftResult.complexityScore,
+                            readabilityScore: driftResult.readabilityScore,
+                            pedagogyDrifted: driftResult.pedagogyDrifted,
+                            driftExplanation: driftResult.driftExplanation,
                         })
                         .returning();
 

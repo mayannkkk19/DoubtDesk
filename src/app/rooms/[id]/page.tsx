@@ -40,6 +40,8 @@ import { toast } from "sonner";
 import useSWRInfinite from "swr/infinite";
 import { useInView } from "react-intersection-observer";
 
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as ChartTooltip, CartesianGrid } from 'recharts';
+import { BookOpen, CheckCircle, Sliders } from 'lucide-react';
 import { Doubt, AnalyticsData, PersonalAnalytics } from "@/types";
 
 interface Classroom {
@@ -68,6 +70,11 @@ export default function ClassroomPage() {
     const [copied, setCopied] = useState(false);
     const [doubtFilter, setDoubtFilter] = useState<'unsolved' | 'in-progress' | 'solved'>('unsolved');
     const [searchVal, setSearchVal] = useState("");
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    const [pedagogyLevel, setPedagogyLevel] = useState('');
+    const [targetGrade, setTargetGrade] = useState('');
+    const [pedagogyProfile, setPedagogyProfile] = useState<any>(null);
+
     const [searchQuery, setSearchQuery] = useState("");
     const [subjectFilter, setSubjectFilter] = useState("All");
     const [tagFilter, setTagFilter] = useState("");
@@ -166,9 +173,16 @@ export default function ClassroomPage() {
         }
     };
 
-    useEffect(() => {
-        mutate();
-    }, [activeTab, tagFilter, searchQuery, subjectFilter]);
+    useEffect(() => { mutate(); }, [activeTab, tagFilter, searchQuery, subjectFilter]);
+
+  // Fetch pedagogy profile for the current classroom
+  useEffect(() => {
+    if (classroom?.id) {
+      fetch(`/api/classroom/pedagogy?classroomId=${classroom.id}`)
+        .then(r => r.json())
+        .then(setPedagogyProfile);
+    }
+  }, [classroom?.id]);
 
     const copyCode = async () => {
         if (classroom?.inviteCode) {
@@ -646,10 +660,19 @@ export default function ClassroomPage() {
                 )}
 
                 {activeTab === "insights" && (
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                         <ClassroomInsightsView classroomId={Number(id)} role={classroom?.role} />
-                    </div>
-                )}
+                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                          <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-bold tracking-tight">Insights</h2>
+                            <button
+                              onClick={() => setIsSettingsModalOpen(true)}
+                              className="flex items-center gap-1 text-sm font-medium text-slate-600 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 transition"
+                            >
+                              <Sliders className="w-4 h-4" /> Settings
+                            </button>
+                          </div>
+                          <ClassroomInsightsView classroomId={Number(id)} role={classroom?.role} />
+                     </div>
+                 )}
 
                 {activeTab !== 'insights' && (
                     <div ref={loadMoreRef} className="py-8 flex justify-center">
@@ -776,6 +799,25 @@ function ClassroomInsightsView({ classroomId, role }: { classroomId: number, rol
                     </div>
                 ))}
             </div>
+                {/* Pedagogical Drift Chart */}
+                <div className="bg-white/50 dark:bg-zinc-950/30 border border-slate-200 dark:border-zinc-900 rounded-2xl p-6 shadow-sm backdrop-blur-sm">
+                    <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-wider mb-4">Pedagogical Drift Over Time</h3>
+                    <ResponsiveContainer width="100%" height={200}>
+                        <AreaChart data={data?.driftOverTime || []} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                            <defs>
+                                <linearGradient id="colorGrade" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#6b46c1" stopOpacity={0.8} />
+                                    <stop offset="95%" stopColor="#6b46c1" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                            <YAxis domain={[0, 20]} tickCount={5} tick={{ fontSize: 10 }} />
+                            <ChartTooltip contentStyle={{ backgroundColor: "#f9fafb", border: "none" }} />
+                            <Area type="monotone" dataKey="gradeLevel" stroke="#6b46c1" fillOpacity={1} fill="url(#colorGrade)" />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white/50 dark:bg-zinc-950/30 border border-slate-200 dark:border-zinc-900 rounded-3xl p-6 md:p-8 backdrop-blur-xl flex flex-col justify-between shadow-xl shadow-slate-200/5 dark:shadow-none">

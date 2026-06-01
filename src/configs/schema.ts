@@ -34,6 +34,8 @@ export const classroomsTable = pgTable("classrooms", {
     year: varchar({ length: 50 }).notNull(),
     teacherEmail: varchar({ length: 255 }).notNull(),
     inviteCode: varchar({ length: 10 }).notNull().unique(),
+    pedagogyLevel: varchar({ length: 50 }).default("Undergraduate (Freshman)").notNull(),
+    targetGradeLevel: integer().default(13).notNull(),
     createdAt: timestamp().defaultNow().notNull(),
 });
 
@@ -220,6 +222,11 @@ export const repliesTable = pgTable("replies", {
     content: text("content"),
     imageUrl: text("image_url"),
     upvotes: integer("upvotes").default(0).notNull(),
+    gradeLevel: integer("grade_level"),
+    complexityScore: integer("complexity_score"),
+    readabilityScore: integer("readability_score"),
+    pedagogyDrifted: boolean("pedagogy_drifted").default(false),
+    driftExplanation: text("drift_explanation"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
     doubtIdIndex: index("doubtId_idx").on(table.doubtId),
