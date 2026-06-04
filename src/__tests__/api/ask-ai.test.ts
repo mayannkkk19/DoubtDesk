@@ -1,5 +1,6 @@
 import { POST } from '@/app/api/ask-ai/route';
 import { aiLimiter } from '@/lib/ratelimit';
+import { AI_REQUEST_MAX_BYTES } from '@/lib/ai-image-validation';
 
 jest.mock('@/lib/ratelimit', () => ({
     aiLimiter: {
@@ -153,6 +154,25 @@ describe('Ask AI API Endpoint', () => {
         expect(json).toEqual({
             error: 'Please upload a valid PNG, JPG, or WEBP image.',
             code: 'INVALID_IMAGE_PAYLOAD',
+        });
+    });
+
+    it('POST should reject request bodies larger than the configured limit', async () => {
+        const req = new Request('http://localhost/api/ask-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                prompt: 'x'.repeat(AI_REQUEST_MAX_BYTES),
+            }),
+        });
+
+        const res = await POST(req);
+        const json = await res.json();
+
+        expect(res.status).toBe(413);
+        expect(json).toEqual({
+            error: 'Requests must be 4MB or smaller.',
+            code: 'REQUEST_TOO_LARGE',
         });
     });
 });
