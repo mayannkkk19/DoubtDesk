@@ -153,16 +153,18 @@ export async function POST(req: Request) {
                 )
             );
 
-            if (!membership || !canTeach(membership.role)) {
-                return NextResponse.json(
-                    { error: "Insufficient permissions to reply to this doubt" },
-                    { status: 403 }
-                );
-            }
+            if (doubt.classroomId) {
+                if (!membership || !canTeach(membership.role)) {
+                    return NextResponse.json(
+                        { error: "Insufficient permissions to reply to this doubt" },
+                        { status: 403 }
+                    );
+                }
         }
-            
+        }
+        
 
-        const newReply = await db.insert(repliesTable).values({
+                    const newReply = await db.insert(repliesTable).values({
             doubtId: doubtId,
             userName,
             userEmail: email,
