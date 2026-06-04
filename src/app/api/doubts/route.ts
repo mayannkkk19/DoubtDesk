@@ -20,6 +20,7 @@ import { parseAndValidateRequest } from "@/lib/validations/validate";
 import { createDoubtSchema } from "@/lib/validations/doubt";
 import { createClassroomDoubtNotifications } from "@/lib/notifications/service";
 import { inngest } from "@/inngest/client"; 
+import { canTeach } from "@/lib/auth/membership-guard";
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
@@ -57,10 +58,21 @@ export async function GET(req: Request) {
             conditions.push(isNull(doubtsTable.classroomId));
         }
 
-        const [room] = classroomId
-            ? await db.select().from(classroomsTable).where(eq(classroomsTable.id, classroomId))
-            : [null];
-        const isTeacher = room && room.teacherEmail === email;
+        let isTeacher = false;
+
+        if (classroomId && email) {
+            const [membership] = await db
+            .select()
+            .from(membershipsTable)
+            .where(
+                and(
+                    eq(membershipsTable.userEmail, email),
+                    eq(membershipsTable.classroomId, classroomId)
+                )
+            );
+
+            isTeacher = !!(membership && canTeach(membership.role));
+        }
 
         if (!isTeacher) {
             const teacherCondition = or(not(eq(doubtsTable.type, "teacher")), eq(doubtsTable.userEmail, email));
