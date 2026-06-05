@@ -6,6 +6,16 @@ jest.mock("@clerk/nextjs/server", () => ({
   currentUser: jest.fn(),
 }));
 
+jest.mock("@/lib/ai/kill-switch", () => ({
+  buildAiProviderErrorResponse: jest.fn(
+    () =>
+      new Response(JSON.stringify({ error: "AI provider unavailable" }), {
+        status: 503,
+      }),
+  ),
+  enforceAiAvailability: jest.fn().mockResolvedValue(null),
+}));
+
 const createQueryMock = () => {
   const query: any = {
     from: () => query,
